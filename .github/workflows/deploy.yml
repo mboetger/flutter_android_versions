@@ -40,7 +40,7 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_FUTTERVERSIONS }}'
 
       - name: Deploy Functions and Firestore
         run: npx firebase-tools deploy --only functions,firestore --force
@@ -49,6 +49,6 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_FUTTERVERSIONS }}'
           channelId: live
           # You will need to add projectId here if it's not configured in .firebaserc
