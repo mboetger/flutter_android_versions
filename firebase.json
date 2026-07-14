@@ -19,7 +19,11 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
+     "rewrites": [
+      {
+        "source": "/api/versions",
+        "function": "getFlutterDependencyVersions"
+      },
       {
         "source": "**",
         "destination": "/index.html"
