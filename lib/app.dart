@@ -110,12 +110,12 @@ class _AppState extends State<App> {
           tr([
             td([.text('Java')]),
             td([_versionBadge(java['error'], isError: true)]),
-            td([_versionBadge(java['warn'])]),
+            td([span(attributes: {'style': 'color: var(--text-secondary); font-size: 0.85rem;'}, [.text('N/A (No upper bound)')])]),
           ]),
           tr([
             td([.text('Minimum Android SDK')]),
             td([_versionBadge(minSdk['error'], isError: true)]),
-            td([_versionBadge(minSdk['warn'])]),
+            td([span(attributes: {'style': 'color: var(--text-secondary); font-size: 0.85rem;'}, [.text('N/A (No upper bound)')])]),
           ]),
         ]),
       ]),
