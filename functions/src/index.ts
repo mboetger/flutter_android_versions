@@ -1,5 +1,6 @@
-import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import { onRequest } from 'firebase-functions/v2/https';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import axios from 'axios';
 
 admin.initializeApp();
@@ -25,7 +26,7 @@ function extractAgpVersion(content: string, varName: string): string | null {
 }
 
 // Scheduled function to run every day at midnight
-export const fetchFlutterDependencyVersions = functions.pubsub.schedule('every 24 hours').onRun(async (context) => {
+export const fetchFlutterDependencyVersions = onSchedule('every 24 hours', async (context) => {
   try {
     const response = await axios.get(REPO_URL);
     const content = response.data as string;
@@ -57,14 +58,14 @@ export const fetchFlutterDependencyVersions = functions.pubsub.schedule('every 2
 
     // Save to Firestore
     await admin.firestore().collection('config').doc('flutterVersions').set(versions);
-    functions.logger.info("Successfully updated flutter dependency versions in Firestore.", versions);
+    console.log("Successfully updated flutter dependency versions in Firestore.", versions);
   } catch (error) {
-    functions.logger.error("Error fetching or parsing flutter dependency versions.", error);
+    console.error("Error fetching or parsing flutter dependency versions.", error);
   }
 });
 
 // HTTP Callable function to read the versions (read-only)
-export const getFlutterDependencyVersions = functions.https.onRequest(async (req, res) => {
+export const getFlutterDependencyVersions = onRequest(async (req, res) => {
   // CORS setup if needed, though hosting rewrite avoids CORS mostly
   res.set('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') {
@@ -81,7 +82,7 @@ export const getFlutterDependencyVersions = functions.https.onRequest(async (req
       res.status(404).json({ error: 'Versions not found.' });
     }
   } catch (error) {
-    functions.logger.error("Error reading versions.", error);
+    console.error("Error reading versions.", error);
     res.status(500).json({ error: 'Unable to fetch versions' });
   }
 });
