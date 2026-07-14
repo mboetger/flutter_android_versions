@@ -1,6 +1,7 @@
-import * as admin from 'firebase-admin';
-import { onRequest } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { onRequest } from 'firebase-functions/v2/https';
+import * as logger from 'firebase-functions/logger';
+import * as admin from 'firebase-admin';
 import axios from 'axios';
 
 admin.initializeApp();
@@ -25,8 +26,26 @@ function extractAgpVersion(content: string, varName: string): string | null {
   return null;
 }
 
+function extractJavaVersion(content: string, varName: string): string | null {
+  const regex = new RegExp(`val\\s+${varName}:\\s*JavaVersion\\s*=\\s*JavaVersion\\.VERSION_(\\d+)`);
+  const match = content.match(regex);
+  if (match) {
+    return match[1];
+  }
+  return null;
+}
+
+function extractIntVersion(content: string, varName: string): string | null {
+  const regex = new RegExp(`val\\s+${varName}:\\s*Int\\s*=\\s*(\\d+)`);
+  const match = content.match(regex);
+  if (match) {
+    return match[1];
+  }
+  return null;
+}
+
 // Scheduled function to run every day at midnight
-export const fetchFlutterDependencyVersions = onSchedule('every 24 hours', async (context) => {
+export const fetchFlutterDependencyVersions = onSchedule('every 24 hours', async (event: any) => {
   try {
     const response = await axios.get(REPO_URL);
     const content = response.data as string;
@@ -39,6 +58,12 @@ export const fetchFlutterDependencyVersions = onSchedule('every 24 hours', async
 
     const warnKGPVersion = extractVersion(content, 'warnKGPVersion');
     const errorKGPVersion = extractVersion(content, 'errorKGPVersion');
+
+    const errorJavaVersion = extractJavaVersion(content, 'errorJavaVersion');
+    const warnJavaVersion = extractJavaVersion(content, 'warnJavaVersion');
+
+    const errorMinSdkVersion = extractIntVersion(content, 'errorMinSdkVersion');
+    const warnMinSdkVersion = extractIntVersion(content, 'warnMinSdkVersion');
 
     const versions = {
       gradle: {
@@ -53,19 +78,27 @@ export const fetchFlutterDependencyVersions = onSchedule('every 24 hours', async
         warn: warnKGPVersion,
         error: errorKGPVersion,
       },
+      java: {
+        warn: warnJavaVersion,
+        error: errorJavaVersion,
+      },
+      minSdk: {
+        warn: warnMinSdkVersion,
+        error: errorMinSdkVersion,
+      },
       lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
     };
 
     // Save to Firestore
     await admin.firestore().collection('config').doc('flutterVersions').set(versions);
-    console.log("Successfully updated flutter dependency versions in Firestore.", versions);
+    logger.info("Successfully updated flutter dependency versions in Firestore.", versions);
   } catch (error) {
-    console.error("Error fetching or parsing flutter dependency versions.", error);
+    logger.error("Error fetching or parsing flutter dependency versions.", error);
   }
 });
 
 // HTTP Callable function to read the versions (read-only)
-export const getFlutterDependencyVersions = onRequest(async (req, res) => {
+export const getFlutterDependencyVersions = onRequest(async (req: any, res: any) => {
   // CORS setup if needed, though hosting rewrite avoids CORS mostly
   res.set('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') {
@@ -82,7 +115,7 @@ export const getFlutterDependencyVersions = onRequest(async (req, res) => {
       res.status(404).json({ error: 'Versions not found.' });
     }
   } catch (error) {
-    console.error("Error reading versions.", error);
+    logger.error("Error reading versions.", error);
     res.status(500).json({ error: 'Unable to fetch versions' });
   }
 });

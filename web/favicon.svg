@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- A simple bar chart with 3 bars -->
+  <!-- Left bar -->
+  <rect x="8" y="32" width="12" height="24" rx="2" fill="#38bdf8"/>
+  <!-- Middle bar -->
+  <rect x="26" y="16" width="12" height="40" rx="2" fill="#818cf8"/>
+  <!-- Right bar -->
+  <rect x="44" y="24" width="12" height="32" rx="2" fill="#38bdf8"/>
+</svg>

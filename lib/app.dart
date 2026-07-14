@@ -79,6 +79,8 @@ class _AppState extends State<App> {
     final gradle = _versions!['gradle'];
     final agp = _versions!['agp'];
     final kgp = _versions!['kgp'];
+    final java = _versions!['java'] ?? {'warn': '17', 'error': '17'};
+    final minSdk = _versions!['minSdk'] ?? {'warn': '24', 'error': '23'};
 
     return div(classes: 'table-wrapper', [
       table([
@@ -104,6 +106,16 @@ class _AppState extends State<App> {
             td([.text('Android Gradle Plugin (AGP)')]),
             td([_versionBadge(agp['error'], isError: true)]),
             td([_versionBadge(agp['warn'])]),
+          ]),
+          tr([
+            td([.text('Java')]),
+            td([_versionBadge(java['error'], isError: true)]),
+            td([_versionBadge(java['warn'])]),
+          ]),
+          tr([
+            td([.text('Minimum Android SDK')]),
+            td([_versionBadge(minSdk['error'], isError: true)]),
+            td([_versionBadge(minSdk['warn'])]),
           ]),
         ]),
       ]),
