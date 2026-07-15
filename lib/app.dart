@@ -114,7 +114,7 @@ class _AppState extends State<App> {
           ]),
           tr([
             td([.text('Minimum Android SDK')]),
-            td([_versionBadge(minSdk['error'], isError: true)]),
+            td([_versionBadge(minSdk['warn'], isError: true)]),
             td([span(attributes: {'style': 'color: var(--text-secondary); font-size: 0.85rem;'}, [.text('N/A (No upper bound)')])]),
           ]),
         ]),
